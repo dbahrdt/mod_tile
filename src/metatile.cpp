@@ -25,6 +25,7 @@
 #include <limits.h>
 #include <syslog.h>
 #include <stdlib.h>
+#include <fstream>
 
 #include "render_config.h"
 #include "metatile.h"
@@ -104,6 +105,16 @@ void metaTile::save(struct storage_backend * store) {
     for (ox=0; ox < limit; ox++) {
         for (oy=0; oy < limit; oy++) {
             memcpy(metatilebuffer + offsets[xyz_to_meta_offset(x_ + ox, y_ + oy, z_)].offset, (const void *)tile[ox][oy].data(), tile[ox][oy].size());
+            {
+                std::stringstream ss;
+                ss << "/debug/tile." << z_ << "." << x_+ox << "." << y_+oy << ".png";
+                std::fstream outfile(ss.str(), std::ios::out|std::ios::binary);
+                if (outfile.is_open()) {
+                    outfile.write(tile[ox][oy].data(), tile[ox][oy].size());
+                    outfile.flush();
+                    outfile.close();
+                }
+            }
         }
     }
     
